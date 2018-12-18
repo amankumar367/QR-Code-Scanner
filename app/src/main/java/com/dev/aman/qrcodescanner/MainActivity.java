@@ -3,11 +3,13 @@ package com.dev.aman.qrcodescanner;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +22,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 public class MainActivity extends AppCompatActivity {
 
+    private DatabaseHelper mDatabase;
     private static final int REQUEST_CODE_QR_SCAN = 101;
     private static final int PERMISSION_REQUEST_CODE = 2;
     private LinearLayout scanQRcode, viewQRcodeList;
@@ -43,16 +46,41 @@ public class MainActivity extends AppCompatActivity {
         viewQRcodeList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, ViewScannedCode.class));
+//                startActivity(new Intent(MainActivity.this, ViewScannedCode.class));
+                Cursor res = mDatabase.getAllData();
+                if(res.getCount() == 0) {
+                    // show message
+                    showMessage("Error","Nothing found");
+                    return;
+                }
+
+                StringBuffer buffer = new StringBuffer();
+                while (res.moveToNext()) {
+                    buffer.append("Id :"+ res.getString(0)+"\n");
+                    buffer.append("Contents :"+ res.getString(1)+"\n");
+                }
+
+                // Show all data
+                showMessage("Data",buffer.toString());
             }
+
+
         });
+    }
 
+    private void showMessage(String title, String Message) {
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setTitle(title);
+        builder.setMessage(Message);
+        builder.show();
     }
 
     private void init() {
         scanQRcode = findViewById(R.id.scanQRcode);
         viewQRcodeList = findViewById(R.id.viewQRcodeList);
+        mDatabase = new DatabaseHelper(MainActivity.this);
     }
 
     @Override
@@ -63,13 +91,16 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                boolean isInserted = mDatabase.insertData(result.getContents());
+                if(isInserted)
+                    Toast.makeText(MainActivity.this,"Data Inserted",Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(MainActivity.this,"Data not Inserted",Toast.LENGTH_LONG).show();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-
-
 
     private Boolean checkSelfPermission() {
         boolean flag = false;
