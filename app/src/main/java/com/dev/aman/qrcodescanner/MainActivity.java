@@ -10,7 +10,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.blikoon.qrcodescanner.QrCodeActivity;
@@ -21,22 +22,37 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_QR_SCAN = 101;
     private static final int PERMISSION_REQUEST_CODE = 2;
-    private TextView txt ;
+    private LinearLayout scanQRcode, viewQRcodeList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
-        if(checkSelfPermission()){
-            new IntentIntegrator(this).initiateScan();
-        }else {
-            requestPermission();
-        }
+
+        scanQRcode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(checkSelfPermission()){
+                    new IntentIntegrator(MainActivity.this).initiateScan();
+                }else {
+                    requestPermission();
+                }
+            }
+        });
+
+        viewQRcodeList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ViewScannedCode.class));
+            }
+        });
+
 
     }
 
     private void init() {
-        txt = findViewById(R.id.result);
+        scanQRcode = findViewById(R.id.scanQRcode);
+        viewQRcodeList = findViewById(R.id.viewQRcodeList);
     }
 
     @Override
@@ -47,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                txt.setText(result.getContents());
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
