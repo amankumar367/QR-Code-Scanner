@@ -3,22 +3,25 @@ package com.dev.aman.qrcodescanner;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ListPopupWindow;
 import android.widget.Toast;
 
 import com.blikoon.qrcodescanner.QrCodeActivity;
+import com.dev.aman.qrcodescanner.DBHelper.DatabaseHelper;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_QR_SCAN = 101;
     private static final int PERMISSION_REQUEST_CODE = 2;
     private LinearLayout scanQRcode, viewQRcodeList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +40,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(checkSelfPermission()){
-                    new IntentIntegrator(MainActivity.this).initiateScan();
+//                    new IntentIntegrator(MainActivity.this).initiateScan();
+                    IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
+                    integrator.setOrientationLocked(false);
+                    integrator.initiateScan();
                 }else {
                     requestPermission();
                 }
@@ -46,35 +53,11 @@ public class MainActivity extends AppCompatActivity {
         viewQRcodeList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                startActivity(new Intent(MainActivity.this, ViewScannedCode.class));
-                Cursor res = mDatabase.getAllData();
-                if(res.getCount() == 0) {
-                    // show message
-                    showMessage("Error","Nothing found");
-                    return;
-                }
-
-                StringBuffer buffer = new StringBuffer();
-                while (res.moveToNext()) {
-                    buffer.append("Id :"+ res.getString(0)+"\n");
-                    buffer.append("Contents :"+ res.getString(1)+"\n");
-                }
-
-                // Show all data
-                showMessage("Data",buffer.toString());
+                startActivity(new Intent(MainActivity.this, ViewScannedCode.class));
             }
 
 
         });
-    }
-
-    private void showMessage(String title, String Message) {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true);
-        builder.setTitle(title);
-        builder.setMessage(Message);
-        builder.show();
     }
 
     private void init() {
@@ -90,12 +73,22 @@ public class MainActivity extends AppCompatActivity {
             if(result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                boolean isInserted = mDatabase.insertData(result.getContents());
-                if(isInserted)
-                    Toast.makeText(MainActivity.this,"Data Inserted",Toast.LENGTH_LONG).show();
-                else
-                    Toast.makeText(MainActivity.this,"Data not Inserted",Toast.LENGTH_LONG).show();
+                try {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+                    String currentDateTime = dateFormat.format(new Date()); // Find todays date
+                    String[] arrayString = currentDateTime.split(" ");
+                    String Date = arrayString[0];
+                    String Time = arrayString[1];
+//                    Toast.makeText(this, Date+" - Date | Time - "+Time, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Scanned: " + result.getContents() + "\n Time - "+Time+"\n Date - "+Date, Toast.LENGTH_LONG).show();
+                    boolean isInserted = mDatabase.insertData(result.getContents(), Date, Time);
+                    if(isInserted)
+                        Toast.makeText(MainActivity.this,"Data Stored",Toast.LENGTH_LONG).show();
+                    else
+                        Toast.makeText(MainActivity.this,"Scanned Data not Stored",Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
