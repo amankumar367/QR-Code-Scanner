@@ -1,5 +1,6 @@
 package com.dev.aman.qrcodescanner.adapter;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,10 +20,11 @@ public class QrListAdapter extends RecyclerView.Adapter<QrListAdapter.QrListAdap
 
     private ArrayList<QrModel> arrayList;
     DatabaseHelper dbHelper;
-
-    public QrListAdapter(ArrayList<QrModel> list, DatabaseHelper helper) {
+    Context context;
+    public QrListAdapter(ArrayList<QrModel> list, DatabaseHelper helper, Context ctxt) {
         arrayList = list;
         dbHelper = helper;
+        context = ctxt;
     }
 
     @NonNull
@@ -42,6 +44,7 @@ public class QrListAdapter extends RecyclerView.Adapter<QrListAdapter.QrListAdap
             @Override
             public void onClick(View view) {
                 dbHelper.deleteData(arrayList.get(position).getId());
+                notifyItemRemoved(position);
                 Toast.makeText(view.getContext(), "Item Deleted", Toast.LENGTH_SHORT).show();
             }
         });

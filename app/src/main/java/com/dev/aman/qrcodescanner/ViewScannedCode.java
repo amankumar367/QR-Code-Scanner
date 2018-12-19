@@ -32,12 +32,9 @@ public class ViewScannedCode extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_scanned_code);
-        mDatabase = new DatabaseHelper(this);
 
-        recyclerView = findViewById(R.id.recyclerView);
-        changeToGrid = findViewById(R.id.change_grid);
-        changeToLinear = findViewById(R.id.change_linear);
-        sortList = findViewById(R.id.sort_list);
+        init();
+        mDatabase = new DatabaseHelper(this);
         listPopupWindow = new ListPopupWindow(this);
 
         listPopupWindow.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_dropdown_item_1line,sortTo));
@@ -48,21 +45,29 @@ public class ViewScannedCode extends AppCompatActivity {
                 sortBy(i);
             }
         });
-        back = findViewById(R.id.back);
         changeLayoutRecyclerView(false);
-        adapter = new QrListAdapter(mDatabase.getAllData(""),mDatabase);
+        adapter = new QrListAdapter(mDatabase.getAllData(""),mDatabase, this);
         recyclerView.setAdapter(adapter);
         onClicks();
     }
 
+    private void init() {
+        recyclerView = findViewById(R.id.recyclerView);
+        changeToGrid = findViewById(R.id.change_grid);
+        changeToLinear = findViewById(R.id.change_linear);
+        sortList = findViewById(R.id.sort_list);
+        back = findViewById(R.id.back);
+    }
+
     private void sortBy(int i) {
+
         sortList.setText("Sorted By " + sortTo[i]);
         if(!sortTo[i].equals("Size")){
             recyclerView.removeAllViews();
-            adapter = new QrListAdapter(mDatabase.getAllData(""),mDatabase);
+            adapter = new QrListAdapter(mDatabase.getAllData(""),mDatabase, this);
 
         } else {
-            adapter = new QrListAdapter(mDatabase.getAllData("Size"),mDatabase);
+            adapter = new QrListAdapter(mDatabase.getAllData("Size"),mDatabase, this);
         }
         recyclerView.setAdapter(adapter);
         listPopupWindow.dismiss();

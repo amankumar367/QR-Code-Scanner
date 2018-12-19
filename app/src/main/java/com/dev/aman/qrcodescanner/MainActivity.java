@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(checkSelfPermission()){
-//                    new IntentIntegrator(MainActivity.this).initiateScan();
                     IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
                     integrator.setOrientationLocked(false);
                     integrator.initiateScan();
@@ -79,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
                     String[] arrayString = currentDateTime.split(" ");
                     String Date = arrayString[0];
                     String Time = arrayString[1];
-//                    Toast.makeText(this, Date+" - Date | Time - "+Time, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(this, "Scanned: " + result.getContents() + "\n Time - "+Time+"\n Date - "+Date, Toast.LENGTH_LONG).show();
                     boolean isInserted = mDatabase.insertData(result.getContents(), Date, Time);
                     if(isInserted)
                         Toast.makeText(MainActivity.this,"Data Stored",Toast.LENGTH_LONG).show();
