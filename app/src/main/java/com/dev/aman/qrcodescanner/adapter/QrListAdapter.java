@@ -44,7 +44,13 @@ public class QrListAdapter extends RecyclerView.Adapter<QrListAdapter.QrListAdap
             @Override
             public void onClick(View view) {
                 dbHelper.deleteData(arrayList.get(position).getId());
-                notifyItemRemoved(position);
+                try{
+                    arrayList.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, arrayList.size());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 Toast.makeText(view.getContext(), "Item Deleted", Toast.LENGTH_SHORT).show();
             }
         });
