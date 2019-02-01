@@ -1,8 +1,11 @@
 package com.dev.aman.qrcodescanner.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,8 +57,19 @@ public class QrListAdapter extends RecyclerView.Adapter<QrListAdapter.QrListAdap
                 Toast.makeText(view.getContext(), "Item Deleted", Toast.LENGTH_SHORT).show();
             }
         });
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(contentIsUrl(arrayList.get(position).getContents()))
+                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(arrayList.get(position).getContents())));
+            }
+        });
     }
 
+    private boolean contentIsUrl(String contents) {
+        boolean isURL = Patterns.WEB_URL.matcher(contents).matches();
+        return isURL;
+    }
 
     @Override
     public int getItemCount() {

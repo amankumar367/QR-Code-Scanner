@@ -33,8 +33,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        init();
 
+        init();
+        onClick();
+
+    }
+
+    private void init() {
+        scanQRcode = findViewById(R.id.scanQRcode);
+        viewQRcodeList = findViewById(R.id.viewQRcodeList);
+        mDatabase = new DatabaseHelper(MainActivity.this);
+    }
+
+    private void onClick() {
         scanQRcode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,12 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         });
-    }
-
-    private void init() {
-        scanQRcode = findViewById(R.id.scanQRcode);
-        viewQRcodeList = findViewById(R.id.viewQRcodeList);
-        mDatabase = new DatabaseHelper(MainActivity.this);
     }
 
     @Override
